@@ -210,7 +210,7 @@ class LoginVC: UIViewController {
     @objc func loginAction() {
         
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        let controller = storyboard.instantiateViewController(withIdentifier: "ViewController") as! ViewController
+        let controller = storyboard.instantiateViewController(withIdentifier: "MainGameController") as! MainGameController
         
         navigationController?.pushViewController(controller, animated: true)
         
