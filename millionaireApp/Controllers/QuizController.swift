@@ -9,14 +9,16 @@ import UIKit
 
 class QuizController: UIViewController {
     
+    var x: Int = 0
     var gameModels: [Question] = []
+    
     var currentQuestion: Question?
     
     var quizCount: Int = 0
     var correctAnswerCount: Int = 0
     
-    var index: Int = 0
-    var myIndexPath: IndexPath?
+//    var index: Int = 0
+    
     
     
     
@@ -83,11 +85,19 @@ class QuizController: UIViewController {
     
     @objc func nextQuestion() {
         
-        myIndexPath = IndexPath(row: 0, section: 0)
-        
-        index += 1
-        quizCount += 1
-        scoreLabel.text = "\(correctAnswerCount)/\(quizCount)"
+//        let indexPath = IndexPath(row: 0, section: 0)
+//        if let cell = myCollection.cellForItem(at: indexPath) as? CollectionCell {
+//            let answer = cell.myLabel.text
+//            
+//        }
+//            
+//        
+//        index += 1
+//        
+//        if index < gameModels.count {
+//            let indexPath = IndexPath(item: index, section: 0)
+//            myCollection.scrollToItem(at: indexPath, at: .centeredVertically, animated: true)
+//        }
         
     }
     
@@ -282,6 +292,7 @@ extension QuizController: UICollectionViewDelegate, UICollectionViewDataSource {
         return cell
         
     }
+    
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
