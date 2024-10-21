@@ -9,16 +9,14 @@ import Foundation
 import UIKit
 
 struct Question {
-    
     let text: String
     let answer: [Answer]
-    
 }
 
+
 struct Answer {
-    
     let text: String
     let correct: Bool
-    
-    
 }
+
+

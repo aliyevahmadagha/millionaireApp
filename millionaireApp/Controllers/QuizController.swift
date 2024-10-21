@@ -11,135 +11,84 @@ class QuizController: UIViewController {
     
     var x: Int = 0
     var gameModels: [Question] = []
-    
     var currentQuestion: Question?
-    
     var quizCount: Int = 0
     var correctAnswerCount: Int = 0
-    
-//    var index: Int = 0
-    
-    
-    
-    
+    var selectedAnswer: Answer?
+    var isAnswered: Bool = false
+   
     let myCollection: UICollectionView = {
-        
         let layout = UICollectionViewFlowLayout()
         layout.minimumLineSpacing = 25
-        
         layout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
-        
         let collection = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        
         collection.backgroundColor = UIColor(named: "backgroundGray")
-        
         layout.itemSize = CGSize(width: 346, height: 53)
         return collection
-        
     }()
     
-    
     let quizView: UIView = {
-        
         let view = UIView()
         view.layer.cornerRadius = 20
         view.backgroundColor = .white
         return view
-        
     }()
     
-    
     let quizLabel: UILabel = {
-        
         let label = UILabel()
         label.text = "In what year did the United States host the FIFA World Cup for the first time?"
         label.numberOfLines = 0
         label.textAlignment = .center
         return label
-        
     }()
     
-    
     let scoreLabel: UILabel = {
-        
         let label = UILabel()
         label.numberOfLines = 0
         return label
-        
     }()
-    
-    
-    
-    
+
     lazy var nextButton: UIButton = {
-        
         let button = UIButton()
         button.setTitle("Next", for: .normal)
         button.layer.cornerRadius = 20
         button.addTarget(self, action: #selector(nextQuestion), for: .touchUpInside)
         button.backgroundColor = UIColor(named: "nextButtonColor")
         return button
-        
     }()
     
-    
     @objc func nextQuestion() {
-        
-//        let indexPath = IndexPath(row: 0, section: 0)
-//        if let cell = myCollection.cellForItem(at: indexPath) as? CollectionCell {
-//            let answer = cell.myLabel.text
-//            
-//        }
-//            
-//        
-//        index += 1
-//        
-//        if index < gameModels.count {
-//            let indexPath = IndexPath(item: index, section: 0)
-//            myCollection.scrollToItem(at: indexPath, at: .centeredVertically, animated: true)
-//        }
-        
+        if isAnswered {
+            x += 1
+            if x < gameModels.count {
+                configureUI(question: gameModels[x])
+                isAnswered = false
+                selectedAnswer = nil
+            }
+        }
     }
     
-    
-    
-    
-
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        
         view.backgroundColor = UIColor(named: "backgroundGray")
         view.alpha = 1
-        
+
         setupConstraints()
         collectionViewConfigure()
         setupQuestions()
         configureUI(question: gameModels.first!)
-        
-        
-
     }
-    
     
     private func checkAnswer(answer: Answer, question: Question) -> Bool {
-        
         return question.answer.contains(where: { $0.text == answer.text }) && answer.correct
-        
     }
-    
     
     private func configureUI(question: Question) {
-        
         currentQuestion = question
         quizLabel.text = question.text
-        
         myCollection.reloadData()
-        
-        
     }
-    
-    
     
     private func setupQuestions() {
         
@@ -206,16 +155,11 @@ class QuizController: UIViewController {
         
     }
     
-    
     func collectionViewConfigure() {
-        
         myCollection.delegate = self
         myCollection.dataSource = self
         myCollection.register(UINib(nibName: "CollectionCell", bundle: nil), forCellWithReuseIdentifier: "CollectionCell")
-        
-        
     }
-    
     
     func setupConstraints() {
         
@@ -260,80 +204,45 @@ class QuizController: UIViewController {
         scoreLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         scoreLabel.widthAnchor.constraint(equalToConstant: 32).isActive = true
         scoreLabel.heightAnchor.constraint(equalToConstant: 29).isActive = true
-        
-        
-        
     }
-    
-    
-    
-    
-    
-    
 }
 
 extension QuizController: UICollectionViewDelegate, UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        
-        guard let count = currentQuestion?.answer.count else {return 0}
-        return count
-        
+        return currentQuestion?.answer.count ?? 0
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CollectionCell", for: indexPath) as! CollectionCell
-        
         let object = currentQuestion?.answer[indexPath.row]
-        
         cell.myLabel.text = object?.text
         
-        return cell
-        
-    }
-    
-    
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        
-        guard let question = currentQuestion else { return }
-        
-        let answer = question.answer[indexPath.row]
-        
-       
-        
-        if checkAnswer(answer: answer, question: question) {
-            
-            if let index = gameModels.firstIndex(where: { $0.text == question.text }) {
-                
-                if index < (gameModels.count - 1) {
-                    let nextQuestion = gameModels[index + 1]
-                    currentQuestion = nil
-                    configureUI(question: nextQuestion)
-                    
-                    
-                    
-                    
-                        
-                } else {
-                    
-                    let alert = UIAlertController(title: "Done", message: "You won", preferredStyle: .alert)
-                    alert.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler: nil))
-                    
-                    present(alert, animated: true)
-                    
+        if isAnswered {
+            if let selectedAnswer = selectedAnswer {
+                if object?.text == selectedAnswer.text {
+                    cell.bgView.backgroundColor = selectedAnswer.correct ? .green : .red
+                } else if object?.correct == true {
+                    cell.bgView.backgroundColor = .green
                 }
             }
             
-            
         } else {
-            
-            
-            
+            cell.bgView.backgroundColor = .white
         }
-                
-        
-        
+        return cell
     }
     
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard !isAnswered else { return }
+        if let answer = currentQuestion?.answer[indexPath.row] {
+            selectedAnswer = answer
+            isAnswered = true
+            if checkAnswer(answer: answer, question: currentQuestion!) {
+                correctAnswerCount += 1
+            }
+            myCollection.reloadData()
+        }
+    }
 }
